@@ -1,0 +1,264 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>SMM Panel — Instagram / YouTube / Facebook</title>
+<style>
+body{margin:0;font-family:Inter,Arial,sans-serif;background:linear-gradient(135deg,#ff9a9e,#fad0c4,#fad0c4,#fbc2eb,#a18cd1);min-height:100vh;overflow-x:hidden}
+h1{text-align:center;color:#fff;padding:20px 10px;text-shadow:1px 1px 3px rgba(0,0,0,.4)}
+.platform-box{background:#fff;border-radius:20px;box-shadow:0 4px 12px rgba(0,0,0,.2);margin:20px auto;padding:20px;max-width:480px}
+.platform-title{display:flex;align-items:center;font-size:1.4em;font-weight:bold;margin-bottom:15px}
+.platform-title img{width:28px;height:28px;margin-right:10px}
+.service{display:flex;justify-content:space-between;align-items:center;background:#f9f9f9;border-radius:12px;padding:12px 16px;margin:8px 0;box-shadow:0 2px 6px rgba(0,0,0,.1)}
+.service span{font-size:1em;font-weight:500;color:#333}
+button{background:#0b84ff;color:#fff;border:none;border-radius:12px;padding:8px 14px;cursor:pointer;font-weight:600;transition:background .2s}
+button:hover{background:#0969c7}
+.modal{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.6);display:none;justify-content:center;align-items:center;z-index:1000}
+.modal-content{background:#fff;border-radius:16px;padding:20px;max-width:400px;width:90%;text-align:center;box-shadow:0 4px 15px rgba(0,0,0,.3);display:flex;flex-direction:column;align-items:center}
+.modal-content h2{margin-top:0;font-size:1.5em;color:#222}
+.input-field{margin:12px 0;text-align:center;width:100%}
+.input-field label{display:block;margin-bottom:6px;font-size:.9em;color:#444}
+.input-field input{width:80%;padding:10px;border-radius:10px;border:1px solid #ccc;text-align:left;margin-bottom:8px}
+.qr-code{margin:50px 0;display:flex;justify-content:center;width:100%}
+.close-btn{margin-top:15px;background:#ccc;color:#333}
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#333;color:#fff;padding:10px 20px;border-radius:20px;display:none}
+.payment-logos img{margin:0 5px;vertical-align:middle}
+.big-btn{background:#28a745;padding:12px 20px;font-size:1.2em;border:none;border-radius:12px;color:#fff;margin:10px 0;cursor:pointer;transition:background .2s}
+.big-btn:hover{background:#218838}
+#qrExpiredMsg{font-weight:bold;color:#f00;margin:10px 0;}
+#reloadQRBtn{background:#0b84ff;color:#fff;padding:10px 18px;border:none;border-radius:12px;cursor:pointer;margin:10px 0;transition:background .2s}
+#reloadQRBtn:hover{background:#0969c7}
+</style>
+</head>
+<body>
+<h1>?? Social Media Booster Panel</h1>
+
+<div id="services"></div>
+
+<!-- Username Verification Modal -->
+<div class="modal" id="verifyModal">
+  <div class="modal-content">
+    <h2 id="verifyTitle">Verify</h2>
+    <div class="input-field">
+      <label id="verifyLabel" for="verifyInput"></label>
+      <input type="text" id="verifyInput" placeholder="">
+    </div>
+    <button onclick="verifyUser()">Verify</button>
+    <button class="close-btn" onclick="closeModal('verifyModal')">Cancel</button>
+  </div>
+</div>
+
+<!-- QR Modal with More Payment App Icons -->
+<div class="modal" id="qrModal">
+  <div class="modal-content" style="max-width:400px;align-items:center;">
+    <h2>Scan to Pay via any UPI apps </h2>
+    <div class="payment-logos" style="margin:10px 0;">
+     <div class="payment-logos" style="margin:0px 0; display:flex; justify-content:center; flex-wrap:wrap; gap:8px;">
+  
+</div>
+
+    </div>
+
+    <div class="qr-code" style="margin:5px 0;">
+      <canvas id="qrcode" style="width:400px;height:400px;"></canvas>
+    </div>
+    <div id="amountDisplay" style="font-size:1.6em;font-weight:bold;margin:10px 0;"></div>
+    <div style="margin-bottom:15px;"></div>
+
+    <!-- Countdown -->
+    <div id="countdown" style="margin:10px 0;font-size:1.2em;color:#f00;"></div>
+
+    <!-- UTR Input -->
+    <div class="input-field" id="utrField">
+      <label for="utrInput">Enter your Payment UTR/TXN ID</label>
+      <input type="text" id="utrInput" placeholder="Enter full UTR">
+    </div>
+
+    <!-- Big Green Payment Complete Button -->
+    <button class="big-btn" onclick="verifyUTR()" style="margin-top:10px;">? Payment Completed</button>
+
+    <div id="qrExpiredMsg" style="display:none;font-weight:bold;color:#f00;margin:10px 0;">?? QR expired, please reload</div>
+    <button id="reloadQRBtn" style="display:none;">?? Reload QR Code</button>
+    <button class="close-btn" onclick="closeModal('qrModal')">Cancel</button>
+  </div>
+</div>
+<!-- Payment Not Completed Modal -->
+<div class="modal" id="paymentFailModal">
+  <div class="modal-content">
+    <h2>Payment not completed ?</h2>
+    <p>Please try again.</p>
+    <button onclick="backToQR()">Back to QR</button>
+  </div>
+</div>
+
+<!-- Payment Success Modal -->
+<div class="modal" id="paymentSuccessModal">
+  <div class="modal-content">
+    <h2>? Payment Verified!</h2>
+    <p id="successService"></p>
+    <p id="successUserInput"></p>
+    <p>Your service will be provided soon!</p>
+    <button class="big-btn" onclick="closeModal('paymentSuccessModal')">OK</button>
+  </div>
+</div>
+
+<div class="toast" id="toast">Verified successfully ?</div>
+
+<script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
+<script>
+const UPI_ID = 'ghgfhjkfnhhkb@ptaxis';
+const MERCHANT_NAME = 'Social Media Booster';
+// Multiple valid UTR prefixes
+const UTR_PREFIXES = ["FMPI","ok","T","UTR","utr"];
+
+const SERVICES = [
+  {platform:'Instagram',icon:'https://cdn-icons-png.flaticon.com/512/174/174855.png',items:[
+    {name:'Instagram 1k Followers',price:10,verifyField:{label:'Enter Instagram username',placeholder:'@username'}},
+    {name:'Instagram 10k Followers',price:89,verifyField:{label:'Enter Instagram username',placeholder:'@username'}},
+	 {name:'Instagram Permanent blue tick ??',price:99,verifyField:{label:'Enter Instagram username',placeholder:'@username'}},
+    {name:'Instagram 5k Likes',price:19,verifyField:{label:'Enter Post/Reel link',placeholder:'Paste link here'}},
+    {name:'Instagram 10k Reels Views',price:39,verifyField:{label:'Enter Reel link',placeholder:'Paste reel link'}}
+  ]},
+  {platform:'YouTube',icon:'https://cdn-icons-png.flaticon.com/512/1384/1384060.png',items:[
+    {name:'YouTube 1k Subscribers',price:49,verifyField:{label:'Enter Channel name',placeholder:'Channel name'}},
+    {name:'YouTube 10k Subscribers',price:449,verifyField:{label:'Enter Channel URL',placeholder:'Paste channel URL'}},
+    {name:'YouTube 5k Video Views',price:299,verifyField:{label:'Enter Video URL',placeholder:'Paste video link'}},
+    {name:'YouTube 10k Shorts Views',price:149,verifyField:{label:'Enter Shorts link',placeholder:'Paste shorts link'}},
+    {name:'YouTube 4000H Watchtime',price:999,verifyField:{label:'Enter Channel URL',placeholder:'Paste channel URL'}}
+  ]},
+  {platform:'Facebook',icon:'https://cdn-icons-png.flaticon.com/512/733/733547.png',items:[
+    {name:'Facebook 1k Followers',price:19,verifyField:{label:'Enter Facebook profile/page link',placeholder:'Paste profile or page link'}},
+    {name:'Facebook 10k Followers',price:189,verifyField:{label:'Enter Facebook page/profile link',placeholder:'Paste profile/page link'}},
+    {name:'Facebook 10k Reels Views',price:49,verifyField:{label:'Enter Reel link',placeholder:'Paste reel link'}},
+    {name:'Facebook 5k Reels Likes',price:29,verifyField:{label:'Enter Reel link',placeholder:'Paste reel link'}}
+  ]}
+];
+
+let currentService = null;
+let timerInterval;
+
+function renderServices(){
+  const container=document.getElementById('services');
+  SERVICES.forEach(group=>{
+    const box=document.createElement('div');
+    box.className='platform-box';
+    box.innerHTML=`<div class='platform-title'><img src="${group.icon}"/> ${group.platform}</div>`;
+    group.items.forEach(s=>{
+      const row=document.createElement('div');
+      row.className='service';
+      row.innerHTML=`<span>${s.name} — ?${s.price}</span><button onclick='openVerify(${JSON.stringify(s)})'>Buy</button>`;
+      box.appendChild(row);
+    });
+    container.appendChild(box);
+  });
+}
+
+function openVerify(service){
+  currentService=service;
+  document.getElementById('verifyTitle').innerText=`Verify ${service.name}`;
+  document.getElementById('verifyLabel').innerText=service.verifyField.label;
+  document.getElementById('verifyInput').placeholder=service.verifyField.placeholder;
+  document.getElementById('verifyInput').value='';
+  document.getElementById('verifyInput').focus();
+  document.getElementById('verifyModal').style.display='flex';
+}
+
+function closeModal(id){document.getElementById(id).style.display='none'}
+
+function showToast(msg){
+  const t=document.getElementById('toast');
+  t.innerText=msg;t.style.display='block';
+  setTimeout(()=>{t.style.display='none'},2000);
+}
+
+function verifyUser(){
+  const input=document.getElementById('verifyInput').value.trim();
+  if(!input){alert('Please fill the required field');return;}
+  closeModal('verifyModal');
+  showToast('Verified successfully ?');
+  setTimeout(openQR,500);
+}
+
+function openQR(){
+  const amount=currentService.price;
+  document.getElementById('amountDisplay').innerText = `Amount ?${amount}`;
+  const upiUrl=`upi://pay?pa=${UPI_ID}&pn=${MERCHANT_NAME}&am=${amount}&cu=INR`;
+  const canvas = document.getElementById('qrcode');
+  canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
+  QRCode.toCanvas(canvas, upiUrl, {width:220, height:220}, err=>{if(err)console.error(err)});
+
+  document.getElementById('qrExpiredMsg').style.display='none';
+  document.getElementById('reloadQRBtn').style.display='none';
+  document.getElementById('qrcode').style.display='flex';
+  document.getElementById('utrInput').value='';
+
+  document.getElementById('qrModal').style.display='flex';
+  startCountdown(5*60);
+}
+
+function startCountdown(seconds){
+  clearInterval(timerInterval);
+  let remaining=seconds;
+  const countdownEl = document.getElementById('countdown');
+  countdownEl.innerText = formatTime(remaining);
+
+  timerInterval = setInterval(()=>{
+    remaining--;
+    countdownEl.innerText = formatTime(remaining);
+    if(remaining <= 0){
+      clearInterval(timerInterval);
+      countdownEl.innerText = '';
+      document.getElementById('qrcode').style.display='none';
+      document.getElementById('qrExpiredMsg').style.display='block';
+      document.getElementById('reloadQRBtn').style.display='inline-block';
+    }
+  },1000);
+}
+
+function formatTime(sec){
+  const m = String(Math.floor(sec/60)).padStart(2,'0');
+  const s = String(sec%60).padStart(2,'0');
+  return `?? ${m}:${s}`;
+}
+
+document.getElementById('reloadQRBtn').onclick = function(){ openQR(); };
+
+function paymentNotCompleted(){
+  closeModal('qrModal');
+  document.getElementById('paymentFailModal').style.display='flex';
+}
+
+function backToQR(){
+  closeModal('paymentFailModal');
+  openQR();
+}
+
+// UTR verification with multiple prefixes
+function verifyUTR(){
+  const userUTR = document.getElementById('utrInput').value.trim().toUpperCase();
+  if(!userUTR){
+    alert('Please enter your UTR.');
+    return;
+  }
+
+  const firstFour = userUTR.substring(0,4);
+  if(UTR_PREFIXES.includes(firstFour)){
+    closeModal('qrModal'); // close QR modal
+
+    // Show success modal
+    document.getElementById('successService').innerText = `Service: ${currentService.name}`;
+    const userInput = document.getElementById('verifyInput').value.trim();
+    document.getElementById('successUserInput').innerText = `Your input: ${userInput}`;
+
+    document.getElementById('paymentSuccessModal').style.display='flex';
+  } else {
+    alert('Payment not completed ?Wrong UTR');
+    document.getElementById('utrInput').value='';
+  }
+}
+
+renderServices();
+</script>
+</body>
+</html>
