@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>SMM Panel — Instagram / YouTube / Facebook</title>
+<title>SMM Panel â€” Instagram / YouTube / Facebook</title>
 <style>
 body{margin:0;font-family:Inter,Arial,sans-serif;background:linear-gradient(135deg,#ff9a9e,#fad0c4,#fad0c4,#fbc2eb,#a18cd1);min-height:100vh;overflow-x:hidden}
 h1{text-align:center;color:#fff;padding:20px 10px;text-shadow:1px 1px 3px rgba(0,0,0,.4)}
@@ -114,19 +114,13 @@ const UTR_PREFIXES = ["FMPI","ok","T","UTR","utr"];
 
 const SERVICES = [
   {platform:'Instagram',icon:'https://cdn-icons-png.flaticon.com/512/174/174855.png',items:[
-    {name:'Instagram 1k Followers',price:10,verifyField:{label:'Enter Instagram username',placeholder:'@username'}},
-    {name:'Instagram 10k Followers',price:89,verifyField:{label:'Enter Instagram username',placeholder:'@username'}},
+    {name:'Instagram 1k Followers',price:25,verifyField:{label:'Enter Instagram username',placeholder:'@username'}},
+    {name:'Instagram 10k Followers',price:99,verifyField:{label:'Enter Instagram username',placeholder:'@username'}},
 	 {name:'Instagram Permanent blue tick ??',price:99,verifyField:{label:'Enter Instagram username',placeholder:'@username'}},
     {name:'Instagram 5k Likes',price:19,verifyField:{label:'Enter Post/Reel link',placeholder:'Paste link here'}},
     {name:'Instagram 10k Reels Views',price:39,verifyField:{label:'Enter Reel link',placeholder:'Paste reel link'}}
   ]},
-  {platform:'YouTube',icon:'https://cdn-icons-png.flaticon.com/512/1384/1384060.png',items:[
-    {name:'YouTube 1k Subscribers',price:49,verifyField:{label:'Enter Channel name',placeholder:'Channel name'}},
-    {name:'YouTube 10k Subscribers',price:449,verifyField:{label:'Enter Channel URL',placeholder:'Paste channel URL'}},
-    {name:'YouTube 5k Video Views',price:299,verifyField:{label:'Enter Video URL',placeholder:'Paste video link'}},
-    {name:'YouTube 10k Shorts Views',price:149,verifyField:{label:'Enter Shorts link',placeholder:'Paste shorts link'}},
-    {name:'YouTube 4000H Watchtime',price:999,verifyField:{label:'Enter Channel URL',placeholder:'Paste channel URL'}}
-  ]},
+ 
   {platform:'Facebook',icon:'https://cdn-icons-png.flaticon.com/512/733/733547.png',items:[
     {name:'Facebook 1k Followers',price:19,verifyField:{label:'Enter Facebook profile/page link',placeholder:'Paste profile or page link'}},
     {name:'Facebook 10k Followers',price:189,verifyField:{label:'Enter Facebook page/profile link',placeholder:'Paste profile/page link'}},
@@ -147,7 +141,7 @@ function renderServices(){
     group.items.forEach(s=>{
       const row=document.createElement('div');
       row.className='service';
-      row.innerHTML=`<span>${s.name} — ?${s.price}</span><button onclick='openVerify(${JSON.stringify(s)})'>Buy</button>`;
+      row.innerHTML=`<span>${s.name} â€” ?${s.price}</span><button onclick='openVerify(${JSON.stringify(s)})'>Buy</button>`;
       box.appendChild(row);
     });
     container.appendChild(box);
@@ -262,3 +256,4 @@ renderServices();
 </script>
 </body>
 </html>
+
